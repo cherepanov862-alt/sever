@@ -26,15 +26,20 @@ jobs:
           echo "dir=$(dirname "$f")" >> "$GITHUB_OUTPUT"
 
       - name: Set up JDK 17
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@v5
         with:
           distribution: temurin
           java-version: '17'
 
-      - name: Set up Android SDK
-        uses: android-actions/setup-android@v3
+      - name: Prepare Android SDK
+        run: |
+          SDK="$ANDROID_SDK_ROOT"
+          SM=$(command -v sdkmanager || echo "$SDK/cmdline-tools/latest/bin/sdkmanager")
+          echo "sdkmanager: $SM"
+          yes | "$SM" --licenses >/dev/null 2>&1 || true
+          "$SM" "platform-tools" "platforms;android-34" "build-tools;34.0.0" >/dev/null 2>&1 || true
 
-      - name: Set up Gradle 8.9
+      - name: Set up Gradle
         uses: gradle/actions/setup-gradle@v4
         with:
           gradle-version: '8.9'
